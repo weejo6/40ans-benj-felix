@@ -1,6 +1,6 @@
 // Couche de stockage : Firebase Realtime Database (partagé, temps réel)
 // ou localStorage (mode démo, sur cet appareil seulement).
-import { firebaseConfig, ROOT } from './config.js';
+import { firebaseConfig, ROOT } from './config.js?v=20261120b';
 
 const FIREBASE_VERSION = '12.6.0';
 

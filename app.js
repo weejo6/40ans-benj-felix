@@ -1,9 +1,9 @@
-import * as CONFIG from './config.js';
+import * as CONFIG from './config.js?v=20261120b';
 
 // Import « tolérant » : un vieux config.js resté en cache ne casse pas le site.
 const { MONTHS, CITIES, SEED } = CONFIG;
 const KITS = CONFIG.KITS || {};
-import { createStore } from './store.js';
+import { createStore } from './store.js?v=20261120b';
 
 // ───────────── Outils ─────────────
 const $ = (s, el = document) => el.querySelector(s);
