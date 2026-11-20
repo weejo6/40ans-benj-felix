@@ -8,10 +8,18 @@
         "$pid": {
           ".write": true,
           ".validate": "$pid.matches(/^[a-z0-9-]{1,30}$/) && newData.hasChildren(['name', 'order'])",
-          "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
-          "order": { ".validate": "newData.isNumber()" },
-          "note": { ".validate": "newData.isString() && newData.val().length <= 300" },
-          "$other": { ".validate": false }
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24"
+          },
+          "order": {
+            ".validate": "newData.isNumber()"
+          },
+          "note": {
+            ".validate": "newData.isString() && newData.val().length <= 300"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       },
       "days": {
@@ -34,6 +42,12 @@
         "seeded": {
           ".write": true,
           ".validate": "newData.isBoolean()"
+        }
+      },
+      "votes": {
+        "$pid": {
+          ".write": "root.child('trip40/people/' + $pid).exists()",
+          ".validate": "newData.isString() && newData.val().matches(/^(dublin|liverpool|manchester|belfast)$/)"
         }
       }
     }

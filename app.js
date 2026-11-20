@@ -1,9 +1,9 @@
-import * as CONFIG from './config.js?v=20261120b';
+import * as CONFIG from './config.js?v=20261120c';
 
 // Import « tolérant » : un vieux config.js resté en cache ne casse pas le site.
 const { MONTHS, CITIES, SEED } = CONFIG;
 const KITS = CONFIG.KITS || {};
-import { createStore } from './store.js?v=20261120b';
+import { createStore } from './store.js?v=20261120c';
 
 // ───────────── Outils ─────────────
 const $ = (s, el = document) => el.querySelector(s);
@@ -60,7 +60,7 @@ const initials = (name) => name.trim().slice(0, 2).toUpperCase();
 
 // ───────────── État ─────────────
 let store = null;
-let state = { people: [], days: {}, presence: {} };
+let state = { people: [], days: {}, presence: {}, votes: {} };
 let A = analyze();
 let me = safeGet('trip40-me');
 let brush = ['ok', 'maybe', 'no', 'clear'].includes(safeGet('trip40-brush')) ? safeGet('trip40-brush') : 'ok';
@@ -68,6 +68,12 @@ let seenPeople = false;
 let prevSigs = {};
 let prevAllIn = null;
 let prevBoard = null;
+let prevVotes = null;
+let votePicking = false;
+// Part de chaque ville sur la roue : 1 + son nombre de votes.
+let wheelTarget = CITIES.map(() => 1);
+const cityById = (id) => CITIES.find((c) => c.id === id);
+const joinFr = (arr) => (arr.length < 2 ? arr.join('') : `${arr.slice(0, -1).join(', ')} et ${arr[arr.length - 1]}`);
 let stripSel = null;
 let pending = 0;
 let connected = true;
@@ -87,6 +93,7 @@ init();
 async function init() {
   buildCities();
   buildWheel();
+  setupVotes();
   setupCard();
   setupEditor();
   setupTeam();
@@ -142,7 +149,11 @@ function onData(raw) {
     p.kit = KITS[p.id] || plainKit(PALETTE[extra++ % PALETTE.length]);
     p.color = p.kit.body;
   });
-  state = { people, days: raw.days || {}, presence: raw.presence || {} };
+  const votes = {};
+  Object.entries(raw.votes || {}).forEach(([pid, v]) => {
+    if (cityById(v) && people.some((p) => p.id === pid)) votes[pid] = v;
+  });
+  state = { people, days: raw.days || {}, presence: raw.presence || {}, votes };
   A = analyze();
   detectChanges();
   renderAll();
@@ -220,6 +231,16 @@ function detectChanges() {
     });
     if (prevAllIn !== null && A.allInCount !== prevAllIn) celebrate(prevAllIn);
   }
+  if (prevVotes) {
+    state.people.forEach((p) => {
+      const before = prevVotes[p.id];
+      const after = state.votes[p.id];
+      if (p.id === me || before === after) return;
+      const c = cityById(after);
+      toast(c ? `🗳️ ${p.name} vote pour ${c.emoji} ${c.name}` : `🗳️ ${p.name} a retiré son vote`);
+    });
+  }
+  if (state.people.length) prevVotes = { ...state.votes };
   prevSigs = sigs;
   prevAllIn = A.allInCount;
   if (state.people.length) seenPeople = true;
@@ -268,7 +289,7 @@ function toggleValue(key) {
   return st(me, key) === brush ? null : brush;
 }
 
-function setMe(pid) {
+function setMe(pid, from) {
   if (pid === me) return;
   me = pid;
   safeSet('trip40-me', pid);
@@ -276,7 +297,7 @@ function setMe(pid) {
   prevSigs = {};
   renderAll();
   const p = meP();
-  if (p) toast(`👋 Salut ${p.name} ! Prends un pinceau et colorie tes jours.`);
+  if (p) toast(from === 'vote' ? `👋 Salut ${p.name} ! Choisis ta ville préférée.` : `👋 Salut ${p.name} ! Prends un pinceau et colorie tes jours.`);
 }
 
 // ───────────── Rendu ─────────────
@@ -291,6 +312,7 @@ function renderAll() {
   renderEditor();
   renderTeam();
   renderNotes();
+  renderVotes();
 }
 
 function setSync(kind, label) {
@@ -319,7 +341,7 @@ function renderHeroLive() {
   const el = $('#heroLive');
   if (!state.people.length) { el.innerHTML = ''; return; }
   const live = store && store.mode === 'firebase' ? '🟢 En direct' : '🧪 Démo';
-  el.innerHTML = `<span class="pill">${live}</span><span><b>${A.allInCount}</b> ${A.allInCount > 1 ? 'jours' : 'jour'} où tout le monde est partant · <b>${A.complete}/${state.people.length}</b> ont tout rempli</span>`;
+  el.innerHTML = `<span class="pill">${live}</span><span><b>${A.allInCount}</b> ${A.allInCount > 1 ? 'jours' : 'jour'} où tout le monde est partant · <b>${A.complete}/${state.people.length}</b> ont tout rempli · 🗳️ <b>${voteStats().voted}</b> ${voteStats().voted > 1 ? 'votes' : 'vote'}</span>`;
 }
 
 function renderBoard() {
@@ -712,30 +734,21 @@ function buildCities() {
       <span class="city-emoji" aria-hidden="true">${c.emoji}</span>
       <h3>${c.name}</h3>
       <p>${c.fact}</p>
+      <div class="city-vote">
+        <div class="vmeter" title="Part de la roue"><div class="vbar" aria-hidden="true"><i></i></div><span class="vshare"></span></div>
+        <div class="vrow"><span class="vcount"></span><button type="button" class="vote-btn" data-vote="${c.id}" aria-pressed="false">Voter</button></div>
+        <div class="voters"></div>
+      </div>
     </article>`).join('');
 }
 
 function buildWheel() {
   const svg = $('#wheel');
   const n = CITIES.length;
-  const step = 360 / n;
   const R = 100;
   const pt = (r, a) => [r * Math.sin((a * Math.PI) / 180), -r * Math.cos((a * Math.PI) / 180)];
   let s = '<defs><radialGradient id="shade" r="0.75"><stop offset="0.35" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient></defs>';
-  s += '<circle r="111" fill="#141c3f"/>';
-  CITIES.forEach((c, i) => {
-    const a0 = i * step;
-    const a1 = (i + 1) * step;
-    const [x0, y0] = pt(R, a0);
-    const [x1, y1] = pt(R, a1);
-    const large = step > 180 ? 1 : 0;
-    s += `<path d="M0 0L${x0.toFixed(2)} ${y0.toFixed(2)}A${R} ${R} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}Z" fill="${c.color}" stroke="#141c3f" stroke-width="2.5"/>`;
-    const mid = a0 + step / 2;
-    s += `<g transform="rotate(${mid})">
-      <text y="-56" text-anchor="middle" font-size="${c.name.length > 8 ? 12.5 : 14}" fill="${c.ink}" letter-spacing=".3">${c.name}</text>
-      <text y="-76" text-anchor="middle" dominant-baseline="central" font-size="19">${c.emoji}</text>
-    </g>`;
-  });
+  s += '<circle r="111" fill="#141c3f"/><g class="segs"></g>';
   s += `<circle r="${R}" fill="url(#shade)" stroke="#141c3f" stroke-width="3"/>`;
   s += '<circle r="34" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="3 5" opacity=".7"/>';
   for (let i = 0; i < 20; i++) {
@@ -743,6 +756,35 @@ function buildWheel() {
     s += `<circle class="bulb${i % 2 ? ' alt' : ''}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="3" fill="#fff6c2"/>`;
   }
   svg.innerHTML = s;
+  const segs = svg.querySelector('.segs');
+
+  // Les parts glissent en douceur quand les votes changent.
+  let weights = wheelTarget.slice();
+  let ends = [];
+  const draw = () => {
+    const total = weights.reduce((a, b) => a + b, 0);
+    let a0 = 0;
+    let h = '';
+    ends = [];
+    CITIES.forEach((c, i) => {
+      const sweep = (weights[i] / total) * 360;
+      const a1 = a0 + sweep;
+      ends.push(a1);
+      const [x0, y0] = pt(R, a0);
+      const [x1, y1] = pt(R, a1);
+      h += `<path d="M0 0L${x0.toFixed(2)} ${y0.toFixed(2)}A${R} ${R} 0 ${sweep > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}Z" fill="${c.color}" stroke="#141c3f" stroke-width="2.5"/>`;
+      const mid = a0 + sweep / 2;
+      const fs = c.name.length > 8 ? 12.5 : 14;
+      // Assez de place pour écrire à l'horizontale ? Sinon, le nom suit le rayon.
+      const fits = 2 * 56 * Math.sin((Math.min(sweep, 180) * Math.PI) / 360) >= c.name.length * fs * 0.55 + 4;
+      h += fits
+        ? `<g transform="rotate(${mid.toFixed(2)})"><text y="-56" text-anchor="middle" font-size="${fs}" fill="${c.ink}" letter-spacing=".3">${c.name}</text><text y="-76" text-anchor="middle" dominant-baseline="central" font-size="19">${c.emoji}</text></g>`
+        : `<g transform="rotate(${(mid - 90).toFixed(2)})"><text x="65" text-anchor="middle" dominant-baseline="central" font-size="${c.name.length > 8 ? 11 : 12.5}" fill="${c.ink}">${c.name}</text></g>`;
+      a0 = a1;
+    });
+    segs.innerHTML = h;
+  };
+  draw();
 
   // Rotation continue : elle ralentit après un coup de pouce, mais ne s'arrête jamais.
   const pointer = $('.wheel-pointer');
@@ -770,11 +812,20 @@ function buildWheel() {
     if (lastT == null) lastT = t;
     const dt = Math.min(0.1, (t - lastT) / 1000);
     lastT = t;
+    let moving = false;
+    weights = weights.map((w, i) => {
+      const goal = wheelTarget[i];
+      if (Math.abs(goal - w) < 0.003) return goal;
+      moving = true;
+      return w + (goal - w) * (1 - Math.exp(-dt / 0.35));
+    });
+    if (moving) draw();
     speed = BASE + (speed - BASE) * Math.exp(-dt / 1.6);
     angle = (angle + speed * dt) % 360;
     svg.style.transform = `rotate(${angle.toFixed(2)}deg)`;
     const phi = (360 - angle) % 360;
-    const seg = Math.floor(phi / step) % n;
+    let seg = ends.findIndex((e) => phi < e);
+    if (seg < 0) seg = n - 1;
     if (seg !== lastSeg) { onSegment(seg, lastSeg !== -1); lastSeg = seg; }
     requestAnimationFrame(frame);
   };
@@ -782,6 +833,99 @@ function buildWheel() {
 
   $('#wheelHub').addEventListener('click', () => {
     speed = Math.min(speed + (reduceMotion ? 60 : 480), reduceMotion ? 90 : 1100);
+  });
+}
+
+// ───────────── Les votes ─────────────
+
+function voteStats() {
+  const counts = Object.fromEntries(CITIES.map((c) => [c.id, []]));
+  state.people.forEach((p) => { const v = state.votes[p.id]; if (v) counts[v].push(p); });
+  const weights = CITIES.map((c) => 1 + counts[c.id].length);
+  const total = weights.reduce((a, b) => a + b, 0);
+  const max = Math.max(...CITIES.map((c) => counts[c.id].length));
+  const voted = state.people.filter((p) => state.votes[p.id]).length;
+  return { counts, weights, total, max, voted };
+}
+
+function setupVotes() {
+  $('#cities').addEventListener('click', (e) => {
+    const b = e.target.closest('.vote-btn');
+    if (b) vote(b.dataset.vote, b);
+  });
+  $('#voteAs').addEventListener('click', (e) => {
+    if (e.target.closest('[data-switch]')) { votePicking = true; renderVotes(); return; }
+    const b = e.target.closest('.who-btn[data-pid]');
+    if (!b) return;
+    votePicking = false;
+    if (b.dataset.pid === me) renderVotes();
+    else setMe(b.dataset.pid, 'vote');
+  });
+}
+
+function vote(cityId, btn) {
+  if (!store) return;
+  if (!meP() || votePicking) {
+    const el = $('#voteAs');
+    el.classList.remove('nudge');
+    void el.offsetWidth;
+    el.classList.add('nudge');
+    toast('👆 Dis-nous d’abord qui tu es, juste au-dessus des villes.');
+    return;
+  }
+  const next = state.votes[me] === cityId ? null : cityId;
+  const r = btn.getBoundingClientRect();
+  store.write({ [`votes/${me}`]: next }).then(() => {
+    if (!next) { toast('Vote retiré : tu peux en choisir une autre.'); return; }
+    const c = cityById(next);
+    confetti(60, r.left + r.width / 2, r.top);
+    toast(`🗳️ A voté ! ${c.emoji} ${c.name} prend de la place sur la roue.`);
+  }).catch((err) => {
+    console.error(err);
+    const denied = /permission/i.test(String((err && (err.code || err.message)) || ''));
+    toast(denied ? '🔒 Les votes ne sont pas encore ouverts : il faut mettre à jour les règles Firebase.' : '😬 Le vote n’est pas passé. Réessaie dans un instant.');
+  });
+}
+
+function renderVotes() {
+  const V = voteStats();
+  wheelTarget = V.weights;
+  const p = meP();
+  const n = state.people.length;
+
+  const lead = $('#voteLead');
+  if (!n) lead.innerHTML = '';
+  else if (!V.voted) lead.innerHTML = '🗳️ Aucun vote pour l’instant : à toi d’ouvrir le bal&nbsp;!';
+  else {
+    const top = CITIES.filter((c) => V.counts[c.id].length === V.max);
+    const tally = `<span class="muted">· ${V.voted}/${n} ${V.voted > 1 ? 'ont' : 'a'} voté</span>`;
+    lead.innerHTML = top.length === 1
+      ? `👑 En tête&nbsp;: <b>${top[0].emoji} ${top[0].name}</b> avec ${V.max} voix ${tally}`
+      : `🤝 Égalité entre ${joinFr(top.map((c) => `<b>${c.emoji} ${c.name}</b>`))} (${V.max} voix chacune) ${tally}`;
+  }
+
+  const as = $('#voteAs');
+  withFocus(as, () => {
+    if (!n) as.innerHTML = '';
+    else if (p && !votePicking) as.innerHTML = `<span>Tu votes en tant que</span><span class="who-btn me">${jersey(p)}${esc(p.name)}</span><button type="button" class="switch" data-switch>pas toi&nbsp;?</button>`;
+    else as.innerHTML = '<span>Qui vote&nbsp;?</span>' + state.people.map((q) => `<button type="button" class="who-btn" data-pid="${esc(q.id)}">${jersey(q)}${esc(q.name)}</button>`).join('');
+  });
+
+  CITIES.forEach((c, i) => {
+    const card = document.querySelector(`.city[data-city="${c.id}"]`);
+    const list = V.counts[c.id];
+    const share = Math.round((V.weights[i] / V.total) * 100);
+    card.classList.toggle('in-front', V.max > 0 && list.length === V.max);
+    card.querySelector('.vbar i').style.setProperty('--w', `${share}%`);
+    card.querySelector('.vcount').innerHTML = `<b>${list.length}</b> voix`;
+    card.querySelector('.vshare').innerHTML = `${share}&nbsp;%`;
+    card.querySelector('.vmeter').title = `Part de la roue : ${share} %`;
+    const btn = card.querySelector('.vote-btn');
+    const mine = !!p && state.votes[p.id] === c.id;
+    btn.setAttribute('aria-pressed', String(mine));
+    btn.textContent = mine ? '✓ Mon vote' : 'Voter';
+    btn.title = mine ? 'Clique pour retirer ton vote' : `Voter pour ${c.name}`;
+    card.querySelector('.voters').innerHTML = list.map((q) => `<span class="voter${q.id === me ? ' me' : ''}">${jersey(q)}${esc(q.name)}</span>`).join('');
   });
 }
 

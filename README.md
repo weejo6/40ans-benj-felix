@@ -2,7 +2,7 @@
 
 Le site pour organiser le voyage des 40 ans de Benj & Félix (juin–juillet 2027).
 
-- **La roue du destin** : Dublin, Liverpool, Manchester ou Belfast. Elle tourne en continu.
+- **La roue du destin** : Dublin, Liverpool, Manchester ou Belfast. Chacun vote pour sa ville préférée, et chaque vote agrandit la part de la ville sur la roue, qui tourne en continu.
 - **Le tableau des scores** : les jours où tout le monde est « Dispo » ou « Peut-être », calculés en direct.
 - **Mes dispos** : chacun choisit son maillot et colorie ses jours (sauvegarde instantanée).
 - **Le planning de l'équipe** : toutes les dispos, jour par jour.
@@ -28,7 +28,7 @@ uniquement sur l'appareil).
 
 1. https://console.firebase.google.com → **Créer un projet** (Google Analytics inutile).
 2. **Créer › Realtime Database** → **Créer une base de données** → emplacement `europe-west1` → mode verrouillé.
-3. Onglet **Règles** : coller le contenu de `database.rules.json` → **Publier**.
+3. Onglet **Règles** : coller le contenu de `database.rules.json` → **Publier**. À refaire à chaque modification de ce fichier (ex. : ajout des votes).
 4. **⚙️ Paramètres du projet › Vos applications › `</>` Web** → enregistrer l'appli → copier `firebaseConfig`
    (avec `databaseURL`) dans `config.js`.
 

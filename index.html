@@ -7,7 +7,7 @@
   <meta name="description" content="On part fêter les 40 ans de Benj & Félix en juin ou juillet 2027 : donne tes dispos, le site trouve en direct les dates où tout le monde est partant.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Benj & Félix passent la barre des 40 ans 🎉">
-  <meta property="og:description" content="Donne tes dispos pour juin–juillet 2027. Dublin, Liverpool, Manchester ou Belfast ? La roue tourne…">
+  <meta property="og:description" content="Donne tes dispos pour juin–juillet 2027 et vote pour la destination : Dublin, Liverpool, Manchester ou Belfast ? Où la roue va-t-elle s’arrêter…">
   <meta property="og:url" content="https://weejo6.github.io/40ans-benj-felix/">
   <meta property="og:image" content="https://weejo6.github.io/40ans-benj-felix/assets/og.jpg">
   <meta property="og:image:width" content="1200">
@@ -18,9 +18,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Graduate&display=swap">
-  <link rel="stylesheet" href="styles.css?v=20261120b">
+  <link rel="stylesheet" href="styles.css?v=20261120c">
   <!-- ?v= : à changer à chaque mise en ligne (ici, dans app.js et store.js) pour éviter les vieux fichiers en cache -->
-  <script type="module" src="app.js?v=20261120b"></script>
+  <script type="module" src="app.js?v=20261120c"></script>
 </head>
 <body>
   <canvas id="confetti" aria-hidden="true"></canvas>
@@ -84,7 +84,7 @@
         <div class="wheel-col">
           <div class="wheel-wrap">
             <div class="wheel-pointer" aria-hidden="true"></div>
-            <svg id="wheel" class="wheel" viewBox="-112 -112 224 224" role="img" aria-label="Roue des destinations : Dublin, Liverpool, Manchester et Belfast"></svg>
+            <svg id="wheel" class="wheel" viewBox="-112 -112 224 224" role="img" aria-label="Roue des destinations : la part de chaque ville grandit avec ses votes"></svg>
             <button class="wheel-hub" id="wheelHub" type="button" aria-label="Donner un coup de pouce à la roue">
               <span>?</span>
             </button>
@@ -92,9 +92,11 @@
         </div>
         <div class="roue-text">
           <p class="kicker">La roue du destin</p>
-          <h2>Destination&nbsp;: on hésite encore…</h2>
-          <p class="sub">Le choix n’est pas fait. En attendant, la roue tourne, et elle ne s’arrête jamais. Appuie au centre pour lui donner un coup de pouce.</p>
-          <p class="now">En ce moment, elle pointe sur <strong id="wheelNow">…</strong></p>
+          <h2>Où la roue va-t-elle s’arrêter&nbsp;?</h2>
+          <p class="sub">Dublin, Liverpool, Manchester ou Belfast&nbsp;: rien n’est joué. <b>Vote pour ta ville préférée</b>&nbsp;: chaque voix agrandit sa part de la roue. Elle tourne sans jamais s’arrêter… pour l’instant. Appuie au centre pour la relancer.</p>
+          <p class="now">Si elle s’arrêtait maintenant, cap sur <strong id="wheelNow">…</strong></p>
+          <p class="vote-lead" id="voteLead" aria-live="polite"></p>
+          <div class="vote-as" id="voteAs"></div>
           <div class="cities" id="cities"></div>
         </div>
       </div>
