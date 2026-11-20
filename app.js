@@ -1,4 +1,8 @@
-import { MONTHS, CITIES, SEED, KITS } from './config.js';
+import * as CONFIG from './config.js';
+
+// Import « tolérant » : un vieux config.js resté en cache ne casse pas le site.
+const { MONTHS, CITIES, SEED } = CONFIG;
+const KITS = CONFIG.KITS || {};
 import { createStore } from './store.js';
 
 // ───────────── Outils ─────────────
