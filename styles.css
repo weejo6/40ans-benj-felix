@@ -458,7 +458,7 @@ h3 { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
   justify-content: flex-start; gap: 6px; padding-left: 12px;
   background: #fff; font-weight: 800; font-size: 14px; white-space: nowrap; overflow: hidden;
 }
-.tg .nm .av { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.tg .nm .av { width: 11px; height: 11px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1.5px var(--navy); }
 .tg .nm.me { color: var(--red); }
 .tg .nm.me::after { content: "toi"; font-size: 10px; font-weight: 800; background: var(--red); color: #fff; padding: 0 6px; border-radius: 999px; }
 .tg .hd { flex-direction: column; line-height: 1.1; font-weight: 700; color: var(--muted); border-radius: 8px; height: 40px; margin: 0 1.5px; }
@@ -483,7 +483,7 @@ h3 { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 26px; }
 .note { background: #fff3c4; border-radius: 4px 4px 16px 4px; padding: 14px 16px; box-shadow: 3px 4px 0 rgba(20, 28, 63, .15); transform: rotate(var(--r, -1deg)); border-top: 10px solid rgba(255, 190, 46, .6); }
 .note h4 { margin: 0 0 4px; font-size: 16px; display: flex; align-items: center; gap: 6px; }
-.note h4 i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.note h4 i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 1.5px var(--navy); }
 .note p { margin: 0; font-size: 14.5px; line-height: 1.4; overflow-wrap: anywhere; }
 
 /* ───────────── Pied de page, toasts, confettis ───────────── */

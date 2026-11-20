@@ -467,7 +467,7 @@ function renderPlayers() {
       return `<button type="button" class="player" role="radio" aria-checked="${p.id === me}" data-pid="${esc(p.id)}">
         ${isOnline(p.id) ? '<span class="online-dot" title="En ligne"></span>' : ''}${jersey(p)}
         <span class="pname">${esc(p.name)}</span>
-        ${p.kit.team ? `<span class="pteam" style="--tb:${p.kit.body};--tc:${p.kit.num}">${esc(p.kit.team)}</span>` : ''}
+        ${p.kit.team ? `<span class="pteam" style="--tb:${p.kit.tagBg || p.kit.body};--tc:${p.kit.tagInk || p.kit.num}">${esc(p.kit.team)}</span>` : ''}
         <span class="pbar"><i style="--p:${pct}%"></i></span>
         <span class="pmeta">${pct === 100 ? 'Complet ✓' : `${pct} % rempli`}</span>
       </button>`;

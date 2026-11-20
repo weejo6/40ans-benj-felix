@@ -39,13 +39,14 @@ export const CITIES = [
 // Le maillot de chacun, aux couleurs d'une équipe NFL (sans logo).
 // body : le maillot · stripes : bandes des manches (de la plus proche du poignet)
 // collar : le col · num / numLine : les initiales et leur liseré · team : surnom affiché
+// tagBg / tagInk (facultatif) : couleurs de l'étiquette du surnom (sinon body / num)
 export const KITS = {
   felix:  { team: 'Vikings',  body: '#4f2683', stripes: ['#ffc62f', '#ffffff', '#ffc62f'], collar: '#ffc62f', num: '#ffffff', numLine: '#ffc62f' },
   benj:   { team: 'Dolphins', body: '#008e97', stripes: ['#ffffff', '#fc4c02', '#ffffff'], collar: '#fc4c02', num: '#ffffff', numLine: '#fc4c02' },
   jo:     { team: '49ers',    body: '#aa0000', stripes: ['#ffffff', '#b3995d', '#ffffff'], collar: '#b3995d', num: '#ffffff', numLine: '#b3995d' },
   franck: { team: 'Saints',   body: '#101820', stripes: ['#d3bc8d', '#ffffff', '#d3bc8d'], collar: '#d3bc8d', num: '#ffffff', numLine: '#d3bc8d' },
   adrian: { team: 'Patriots', body: '#002244', stripes: ['#ffffff', '#c60c30', '#ffffff'], collar: '#c60c30', num: '#ffffff', numLine: '#c60c30' },
-  yo:     { team: 'Broncos',  body: '#fb4f14', stripes: ['#002244', '#ffffff', '#002244'], collar: '#002244', num: '#ffffff', numLine: '#002244' },
+  yo:     { team: 'OM',       body: '#ffffff', stripes: ['#009ddc', null, '#009ddc'],      collar: '#009ddc', num: '#009ddc', numLine: '#ffffff', tagBg: '#009ddc', tagInk: '#ffffff' },
 };
 
 // Données de départ (reprises du calendrier v6). Elles ne sont écrites
