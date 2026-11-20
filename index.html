@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Benj &amp; Félix · 40 ans</title>
+  <meta name="description" content="On part fêter les 40 ans de Benj & Félix en juin ou juillet 2027 : donne tes dispos, le site trouve en direct les dates où tout le monde est partant.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Benj & Félix passent la barre des 40 ans 🎉">
+  <meta property="og:description" content="Donne tes dispos pour juin–juillet 2027. Dublin, Liverpool, Manchester ou Belfast ? La roue tourne…">
+  <meta property="og:url" content="https://weejo6.github.io/40ans-benj-felix/">
+  <meta property="og:image" content="https://weejo6.github.io/40ans-benj-felix/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="628">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#141c3f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>🏈</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Graduate&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="#top"><span class="brand-ball" aria-hidden="true">🏈</span>Opération <b>40</b></a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#roue">Destination</a>
+      <a href="#scores">Les dates</a>
+      <a href="#moi">Mes dispos</a>
+      <a href="#planning">Planning</a>
+    </nav>
+    <span id="sync" class="sync" data-state="loading"><i aria-hidden="true"></i><span>Connexion…</span></span>
+  </header>
+
+  <main>
+    <!-- ═════════════ HERO ═════════════ -->
+    <section class="hero" id="top">
+      <div class="wrap hero-inner">
+        <div class="hero-text">
+          <p class="sticker">★ Opération 40 · Été 2027 ★</p>
+          <h1>
+            <span class="h1-names">Benj <span class="amp">&amp;</span> Félix</span>
+            <span class="h1-line">passent la barre des <span class="jersey" id="jersey40" role="button" tabindex="0" aria-label="40 (clique pour des confettis)">40</span> ans</span>
+          </h1>
+          <p class="lead">On part entre potes en <b>juin ou juillet 2027</b>. Colorie tes dispos&nbsp;: le site repère en direct les jours où <b>tout le monde</b> est partant.</p>
+          <div class="cta">
+            <a class="btn btn-primary" href="#moi">Je donne mes dispos <span aria-hidden="true">→</span></a>
+            <a class="btn btn-light" href="#scores">Voir les dates possibles</a>
+          </div>
+          <p class="hero-live" id="heroLive" aria-live="polite"></p>
+        </div>
+
+        <div class="hero-card">
+          <div class="card" id="card">
+            <div class="card-top"><span>Édition collector</span><span>N° 40</span></div>
+            <div class="card-photo">
+              <img src="assets/benjfelix-card.jpg" width="600" height="840" alt="Benj et Félix, tout sourire, en maillots de football américain sur le terrain">
+            </div>
+            <div class="card-bottom">
+              <strong>Benj &amp; Félix</strong>
+              <span>Saison 2027 · 40 ans</span>
+            </div>
+            <div class="card-stats">
+              <div><b>40</b><span>ans</span></div>
+              <div><b>∞</b><span>énergie</span></div>
+              <div><b>2</b><span>légendes</span></div>
+            </div>
+            <div class="card-shine" aria-hidden="true"></div>
+          </div>
+          <span class="badge-joy" aria-hidden="true">Joyeux anniv’ !</span>
+          <span class="badge-star" aria-hidden="true">★</span>
+        </div>
+      </div>
+      <div class="hero-yards" aria-hidden="true"></div>
+    </section>
+
+    <!-- ═════════════ ROUE ═════════════ -->
+    <section class="section" id="roue">
+      <div class="wrap roue-grid">
+        <div class="wheel-col">
+          <div class="wheel-wrap">
+            <div class="wheel-pointer" aria-hidden="true"></div>
+            <svg id="wheel" class="wheel" viewBox="-112 -112 224 224" role="img" aria-label="Roue des destinations : Dublin, Liverpool, Manchester et Belfast"></svg>
+            <button class="wheel-hub" id="wheelHub" type="button" aria-label="Donner un coup de pouce à la roue">
+              <span>?</span>
+            </button>
+          </div>
+        </div>
+        <div class="roue-text">
+          <p class="kicker">La roue du destin</p>
+          <h2>Destination&nbsp;: on hésite encore…</h2>
+          <p class="sub">Le choix n’est pas fait. En attendant, la roue tourne, et elle ne s’arrête jamais. Appuie au centre pour lui donner un coup de pouce.</p>
+          <p class="now">En ce moment, elle pointe sur <strong id="wheelNow">…</strong></p>
+          <div class="cities" id="cities"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═════════════ TABLEAU DES SCORES ═════════════ -->
+    <section class="section section-navy" id="scores">
+      <div class="wrap">
+        <p class="kicker kicker-light">Le tableau des scores · en direct</p>
+        <h2>Quand est-ce que tout le monde est partant&nbsp;?</h2>
+        <p class="sub">Un jour compte quand <b>chaque</b> pote a mis «&nbsp;Dispo&nbsp;» ou «&nbsp;Peut-être&nbsp;». Tout se met à jour dès que quelqu’un colorie un jour.</p>
+
+        <div class="board" id="board"></div>
+
+        <div class="strip-card">
+          <div class="strip-head">
+            <h3>Juin → juillet, jour par jour</h3>
+            <div class="strip-legend">
+              <span><i class="lv lv-sure"></i>Tout le monde sûr</span>
+              <span><i class="lv lv-in"></i>Tout le monde partant</span>
+              <span><i class="lv lv-almost"></i>Il manque 1 pote</span>
+              <span><i class="lv lv-out"></i>Plus compliqué</span>
+            </div>
+          </div>
+          <div class="strip" id="strip" aria-label="Nombre de potes partants pour chaque jour"></div>
+          <div class="strip-detail" id="stripDetail">Glisse le doigt ou la souris sur les barres pour voir le détail d’un jour.</div>
+        </div>
+
+        <div class="win-grid">
+          <div class="panel">
+            <h3>🏆 Les fenêtres de tir</h3>
+            <p class="panel-sub">Les jours d’affilée où tout le monde est partant, les plus longues d’abord.</p>
+            <ol class="windows" id="windows"></ol>
+          </div>
+          <div class="panel">
+            <h3>🤏 À un pote près</h3>
+            <p class="panel-sub">Les jours où il ne manque qu’une seule personne.</p>
+            <ul class="almost" id="almost"></ul>
+          </div>
+        </div>
+
+        <p class="online" id="online"></p>
+      </div>
+    </section>
+
+    <!-- ═════════════ MES DISPOS ═════════════ -->
+    <section class="section" id="moi">
+      <div class="wrap">
+        <p class="kicker">À toi de jouer</p>
+        <h2>Choisis ton maillot, colorie tes jours</h2>
+        <p class="demo-banner" id="demoBanner" hidden>🧪 <b>Mode démo</b> : la base partagée n’est pas encore branchée, donc tes dispos sont enregistrées seulement sur cet appareil.</p>
+
+        <div class="step"><span class="step-n">1</span><span>C’est qui&nbsp;?</span></div>
+        <div class="players" id="players" role="radiogroup" aria-label="Qui es-tu ?"></div>
+        <form class="add-form" id="addForm" hidden>
+          <label for="addName">Prénom du nouveau pote</label>
+          <div class="add-row">
+            <input id="addName" name="name" maxlength="24" autocomplete="off" required placeholder="Ex. : Max">
+            <button class="btn btn-primary btn-sm" type="submit">Ajouter</button>
+            <button class="btn btn-light btn-sm" type="button" id="addCancel">Annuler</button>
+          </div>
+        </form>
+
+        <div class="editor" id="editor">
+          <div class="editor-lock" id="editorLock">
+            <span>👆 Choisis d’abord ton maillot</span>
+          </div>
+
+          <div class="step"><span class="step-n">2</span><span>Prends un pinceau</span></div>
+          <div class="brushes" id="brushes" role="radiogroup" aria-label="Pinceau">
+            <button type="button" class="brush b-ok" data-brush="ok" role="radio"><i>✓</i>Dispo</button>
+            <button type="button" class="brush b-maybe" data-brush="maybe" role="radio"><i>?</i>Peut-être</button>
+            <button type="button" class="brush b-no" data-brush="no" role="radio"><i>✕</i>Pas dispo</button>
+            <button type="button" class="brush b-clear" data-brush="clear" role="radio"><i>⌫</i>Gomme</button>
+          </div>
+
+          <div class="step"><span class="step-n">3</span><span>Colorie tes jours</span></div>
+          <p class="hint">Touche un jour pour le colorier, touche-le encore pour l’effacer. À la souris, maintiens et glisse pour colorier plusieurs jours d’un coup. <span class="hint-star">★</span> = tous les autres sont partants ce jour-là.</p>
+          <div class="months" id="myCal"></div>
+
+          <div class="note-row">
+            <label for="note">Un petit mot pour l’équipe <span class="muted">(facultatif)</span></label>
+            <textarea id="note" maxlength="280" rows="2" placeholder="Ex. : en compet du 9 au 11 juillet, vacances à partir du 23…"></textarea>
+          </div>
+          <p class="save-state" id="saveState" aria-live="polite"></p>
+          <p class="remove-row"><button type="button" class="linkish" id="removeMe"></button></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═════════════ PLANNING ═════════════ -->
+    <section class="section section-paper" id="planning">
+      <div class="wrap">
+        <p class="kicker">Le planning de l’équipe</p>
+        <h2>Toutes les dispos, jour par jour</h2>
+        <div class="legend">
+          <span><i class="sw s-ok">✓</i>Dispo</span>
+          <span><i class="sw s-maybe">?</i>Peut-être</span>
+          <span><i class="sw s-no">✕</i>Pas dispo</span>
+          <span><i class="sw s-none"></i>Pas d’info</span>
+          <span><i class="sw sw-in">★</i>Tout le monde partant</span>
+        </div>
+        <div id="team"></div>
+        <div class="info" id="teamInfo">Survole ou touche une case pour voir le détail. Sur ta propre ligne, un clic change ton statut.</div>
+        <div class="notes" id="notes"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>Fait avec <span aria-hidden="true">❤️</span> pour les 40 ans de Benj &amp; Félix · Rendez-vous à l’été 2027 <span aria-hidden="true">🏈</span></p>
+    </div>
+  </footer>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <noscript><p class="noscript">Ce site a besoin de JavaScript pour fonctionner.</p></noscript>
+</body>
+</html>

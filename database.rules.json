@@ -1,0 +1,41 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "trip40": {
+      ".read": true,
+      "people": {
+        "$pid": {
+          ".write": true,
+          ".validate": "$pid.matches(/^[a-z0-9-]{1,30}$/) && newData.hasChildren(['name', 'order'])",
+          "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+          "order": { ".validate": "newData.isNumber()" },
+          "note": { ".validate": "newData.isString() && newData.val().length <= 300" },
+          "$other": { ".validate": false }
+        }
+      },
+      "days": {
+        "$pid": {
+          "$date": {
+            ".write": true,
+            ".validate": "$date.matches(/^20[2-3][0-9]-[01][0-9]-[0-3][0-9]$/) && newData.isString() && newData.val().matches(/^(ok|maybe|no)$/)"
+          }
+        }
+      },
+      "presence": {
+        "$pid": {
+          "$sid": {
+            ".write": true,
+            ".validate": "newData.isNumber()"
+          }
+        }
+      },
+      "meta": {
+        "seeded": {
+          ".write": true,
+          ".validate": "newData.isBoolean()"
+        }
+      }
+    }
+  }
+}
