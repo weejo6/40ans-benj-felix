@@ -1,4 +1,4 @@
-import { MONTHS, CITIES, SEED } from './config.js';
+import { MONTHS, CITIES, SEED, KITS } from './config.js';
 import { createStore } from './store.js';
 
 // ───────────── Outils ─────────────
@@ -15,7 +15,8 @@ const MONTH_SHORT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 
 const WD_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const WD_SHORT = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
 const WD_LETTER = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-const PALETTE = ['#e63946', '#1d4e89', '#ff7a2f', '#169b62', '#7b4bd6', '#d99a00', '#0f9fb0', '#d6457b', '#5a6b2f', '#9c4f2e'];
+// Couleurs des maillots pour les potes ajoutés en cours de route (sans tenue dans KITS).
+const PALETTE = ['#169b62', '#d6457b', '#d99a00', '#1d4e89', '#7b4bd6', '#5a6b2f', '#9c4f2e', '#0f9fb0', '#e63946', '#ff7a2f'];
 const STATUS = {
   ok: { label: 'Dispo', icon: '✓' },
   maybe: { label: 'Peut-être', icon: '?' },
@@ -133,7 +134,11 @@ function onData(raw) {
     .filter(([, p]) => p && typeof p === 'object')
     .map(([id, p]) => ({ id, name: String(p.name || id), order: typeof p.order === 'number' ? p.order : 999, note: typeof p.note === 'string' ? p.note : '' }))
     .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, 'fr'));
-  people.forEach((p, i) => { p.color = PALETTE[i % PALETTE.length]; });
+  let extra = 0;
+  people.forEach((p) => {
+    p.kit = KITS[p.id] || plainKit(PALETTE[extra++ % PALETTE.length]);
+    p.color = p.kit.body;
+  });
   state = { people, days: raw.days || {}, presence: raw.presence || {} };
   A = analyze();
   detectChanges();
@@ -402,8 +407,39 @@ function renderOnline() {
   else el.innerHTML = `<span class="dot"></span>En ligne maintenant : ${on.map((p) => `<span class="who">${esc(p.name)}</span>`).join('')}`;
 }
 
+// ───────────── Maillots ─────────────
+const INK = '#141c3f';
+const plainKit = (c) => ({ body: c, stripes: ['#ffffff', null, '#ffffff'], collar: '#ffffff', num: '#ffffff', numLine: INK });
+const swatch = (p) => `linear-gradient(135deg, ${p.kit.body} 55%, ${p.kit.collar} 55%)`;
+
+// Bandes de manche parallèles au poignet, entre le bord extérieur (2,25)→(10,11)
+// et l'aisselle (12,31)→(16,25) ; la manche droite est le miroir de la gauche.
+function sleeveBands(stripes) {
+  const out = (t) => [2 + 8 * t, 25 - 14 * t];
+  const inn = (t) => [12 + 4 * t, 31 - 6 * t];
+  const w = 0.44 / stripes.length;
+  return stripes.map((c, i) => {
+    if (!c) return '';
+    const a = 0.12 + i * w, b = a + w;
+    const pts = [out(a), out(b), inn(b), inn(a)];
+    const left = pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+    const right = pts.map(([x, y]) => `${(64 - x).toFixed(2)},${y.toFixed(2)}`).join(' ');
+    return `<polygon points="${left}" fill="${c}"/><polygon points="${right}" fill="${c}"/>`;
+  }).join('');
+}
+
 function jersey(p) {
-  return `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M22 6 10 11 2 25l10 6 4-6v33h32V25l4 6 10-6-8-14-12-5c-2 6-18 6-20 0Z" fill="${p.color}" stroke="#141c3f" stroke-width="3" stroke-linejoin="round"/><path d="M16 50h32" stroke="#fff" stroke-width="3" opacity=".55"/><text x="32" y="43" text-anchor="middle" font-family="Graduate, serif" font-size="17" fill="#fff" stroke="#141c3f" stroke-width="1.2" paint-order="stroke">${esc(initials(p.name))}</text></svg>`;
+  const k = p.kit;
+  const shape = 'M22 6 10 11 2 25l10 6 4-6v33h32V25l4 6 10-6-8-14-12-5c-2 6-18 6-20 0Z';
+  const txt = (extra) => `<text x="32" y="44" text-anchor="middle" font-family="Graduate, serif" font-size="17" stroke-linejoin="round" paint-order="stroke" ${extra}>${esc(initials(p.name))}</text>`;
+  return `<svg viewBox="0 0 64 64" aria-hidden="true">`
+    + `<path d="${shape}" fill="${k.body}"/>`
+    + sleeveBands(k.stripes)
+    + `<path d="M22 6C24 12 40 12 42 6L45 7.25C42.5 15.5 21.5 15.5 19 7.25Z" fill="${k.collar}"/>`
+    + txt(`fill="${k.num}" stroke="${INK}" stroke-width="4.6"`)
+    + txt(`fill="${k.num}" stroke="${k.numLine}" stroke-width="2"`)
+    + `<path d="${shape}" fill="none" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`
+    + '</svg>';
 }
 
 function withFocus(container, fn) {
@@ -427,6 +463,7 @@ function renderPlayers() {
       return `<button type="button" class="player" role="radio" aria-checked="${p.id === me}" data-pid="${esc(p.id)}">
         ${isOnline(p.id) ? '<span class="online-dot" title="En ligne"></span>' : ''}${jersey(p)}
         <span class="pname">${esc(p.name)}</span>
+        ${p.kit.team ? `<span class="pteam" style="--tb:${p.kit.body};--tc:${p.kit.num}">${esc(p.kit.team)}</span>` : ''}
         <span class="pbar"><i style="--p:${pct}%"></i></span>
         <span class="pmeta">${pct === 100 ? 'Complet ✓' : `${pct} % rempli`}</span>
       </button>`;
@@ -489,7 +526,7 @@ function renderTeam() {
     });
     P.forEach((p) => {
       const mine = p.id === me;
-      h += `<div class="nm${mine ? ' me' : ''}"><i class="av" style="background:${p.color}"></i>${esc(p.name)}</div>`;
+      h += `<div class="nm${mine ? ' me' : ''}"><i class="av" style="background:${swatch(p)}"></i>${esc(p.name)}</div>`;
       items.forEach((x) => {
         const s = st(p.id, x.day.key);
         h += `<div class="c${s ? ` s-${s}` : ''}${x.day.wd >= 5 ? ' wk' : ''}${mine ? ' mine' : ''}" data-pid="${esc(p.id)}" data-key="${x.day.key}">${s ? STATUS[s].icon : ''}</div>`;
@@ -508,7 +545,7 @@ function renderNotes() {
   const withNotes = state.people.filter((p) => p.note && p.note.trim());
   $('#notes').innerHTML = withNotes.map((p, i) => `
     <div class="note" style="--r:${[-1.5, 1, -.5, 1.5][i % 4]}deg">
-      <h4><i style="background:${p.color}"></i>${esc(p.name)}</h4>
+      <h4><i style="background:${swatch(p)}"></i>${esc(p.name)}</h4>
       <p>${esc(p.note)}</p>
     </div>`).join('');
 }
