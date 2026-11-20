@@ -2,11 +2,18 @@
 //  Configuration du site « Opération 40 »
 // ─────────────────────────────────────────────────────────────
 
-// Colle ici le bloc firebaseConfig de ta console Firebase
-// (Paramètres du projet › Général › Vos applications › Web).
-// Tant que c'est null, le site tourne en « mode démo » : les dispos
-// restent sur l'appareil et ne sont pas partagées.
-export const firebaseConfig = null;
+// Config Firebase (Paramètres du projet › Général › Vos applications › Web).
+// Ce n'est pas un secret : la sécurité vient des règles (database.rules.json).
+// Remettre à null pour repasser en « mode démo » (dispos sur l'appareil seulement).
+export const firebaseConfig = {
+  apiKey: 'AIzaSyDjQYxPYZPjqpnX8VAB1gPW8mK1qkPB4OI',
+  authDomain: 'operation-40-ac0ba.firebaseapp.com',
+  databaseURL: 'https://operation-40-ac0ba-default-rtdb.europe-west1.firebasedatabase.app',
+  projectId: 'operation-40-ac0ba',
+  storageBucket: 'operation-40-ac0ba.firebasestorage.app',
+  messagingSenderId: '106247171125',
+  appId: '1:106247171125:web:5110f713d4bec0284b957c',
+};
 
 // Dossier de la base Realtime Database où tout est rangé.
 export const ROOT = 'trip40';
