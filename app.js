@@ -19,7 +19,7 @@ const MONTH_SHORT = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 
 const WD_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 const WD_SHORT = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
 const WD_LETTER = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-// Couleurs des maillots pour les potes ajoutés en cours de route (sans tenue dans KITS).
+// Couleurs de secours pour un pote sans tenue dans KITS.
 const PALETTE = ['#169b62', '#d6457b', '#d99a00', '#1d4e89', '#7b4bd6', '#5a6b2f', '#9c4f2e', '#0f9fb0', '#e63946', '#ff7a2f'];
 const STATUS = {
   ok: { label: 'Dispo', icon: '✓' },
@@ -57,7 +57,6 @@ function fmtRangeShort(a, b) {
   return `${a.d}/${pad(a.m)}→${b.d}/${pad(b.m)}`;
 }
 const initials = (name) => name.trim().slice(0, 2).toUpperCase();
-const slug = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'pote';
 
 // ───────────── État ─────────────
 let store = null;
@@ -471,7 +470,7 @@ function renderPlayers() {
         <span class="pbar"><i style="--p:${pct}%"></i></span>
         <span class="pmeta">${pct === 100 ? 'Complet ✓' : `${pct} % rempli`}</span>
       </button>`;
-    }).join('') + `<button type="button" class="player player-add" id="addBtn"><span class="plus">+</span><span class="pname">Ajouter</span><span class="pmeta">un pote</span></button>`;
+    }).join('');
   });
 }
 
@@ -558,29 +557,9 @@ function renderNotes() {
 function setupEditor() {
   // Choix du joueur
   $('#players').addEventListener('click', (e) => {
-    const add = e.target.closest('#addBtn');
-    if (add) { $('#addForm').hidden = false; $('#addName').focus(); return; }
     const b = e.target.closest('.player[data-pid]');
     if (b) setMe(b.dataset.pid);
   });
-
-  // Ajout d'un pote
-  $('#addForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = $('#addName').value.trim().slice(0, 24);
-    if (!name || !store) return;
-    const existing = state.people.find((p) => p.name.toLowerCase() === name.toLowerCase());
-    $('#addForm').hidden = true;
-    $('#addName').value = '';
-    if (existing) { setMe(existing.id); return; }
-    const base = slug(name);
-    let id = base;
-    for (let i = 2; state.people.some((p) => p.id === id); i++) id = `${base}-${i}`;
-    const order = Math.max(-1, ...state.people.map((p) => p.order)) + 1;
-    save({ [`people/${id}`]: { name, order } });
-    setMe(id);
-  });
-  $('#addCancel').addEventListener('click', () => { $('#addForm').hidden = true; });
 
   // Pinceaux
   $('#brushes').addEventListener('click', (e) => {

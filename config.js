@@ -46,6 +46,7 @@ export const KITS = {
   jo:     { team: '49ers',    body: '#aa0000', stripes: ['#ffffff', '#b3995d', '#ffffff'], collar: '#b3995d', num: '#ffffff', numLine: '#b3995d' },
   franck: { team: 'Saints',   body: '#101820', stripes: ['#d3bc8d', '#ffffff', '#d3bc8d'], collar: '#d3bc8d', num: '#ffffff', numLine: '#d3bc8d' },
   adrian: { team: 'Patriots', body: '#002244', stripes: ['#ffffff', '#c60c30', '#ffffff'], collar: '#c60c30', num: '#ffffff', numLine: '#c60c30' },
+  greg:   { team: 'Eagles',   body: '#004c54', stripes: ['#a5acaf', '#ffffff', '#a5acaf'], collar: '#a5acaf', num: '#ffffff', numLine: '#a5acaf' },
   yo:     { team: 'OM',       body: '#ffffff', stripes: ['#009ddc', null, '#009ddc'],      collar: '#009ddc', num: '#009ddc', numLine: '#ffffff', tagBg: '#009ddc', tagInk: '#ffffff' },
 };
 
@@ -59,6 +60,7 @@ export const SEED = {
     { id: 'felix', name: 'Félix', note: 'Pas dispo en juin, dispo en juillet.' },
     { id: 'adrian', name: 'Adrian', note: 'En compétition du 9 au 11 juillet.' },
     { id: 'franck', name: 'Franck', note: 'Dispo sûr du 12 au 16 juillet, peut-être le reste.' },
+    { id: 'greg', name: 'Greg' },
   ],
   // [personne, du, au, statut] : les lignes suivantes écrasent les précédentes.
   ranges: [
