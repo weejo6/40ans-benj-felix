@@ -481,8 +481,6 @@ function renderEditor() {
   renderMyCal();
   const note = $('#note');
   if (document.activeElement !== note) note.value = p ? p.note : '';
-  $('#removeMe').textContent = p ? `Retirer ${p.name} de la liste` : '';
-  $('#removeMe').hidden = !p;
 }
 
 function fillLabel() {
@@ -620,20 +618,6 @@ function setupEditor() {
   };
   note.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(flush, 800); });
   note.addEventListener('blur', flush);
-
-  // Retirer un pote
-  $('#removeMe').addEventListener('click', () => {
-    const p = meP();
-    if (!p) return;
-    if (!confirm(`Retirer ${p.name} et toutes ses dispos ? C’est définitif.`)) return;
-    const u = { [`people/${p.id}`]: null };
-    Object.keys(state.days[p.id] || {}).forEach((k) => { u[`days/${p.id}/${k}`] = null; });
-    save(u);
-    me = null;
-    safeSet('trip40-me', null);
-    store.setPresence(null);
-    toast(`${p.name} a été retiré de la liste.`);
-  });
 }
 
 function fillMonth(mi) {

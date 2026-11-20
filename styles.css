@@ -422,9 +422,6 @@ h3 { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .save-state { margin: 14px 0 0; font-size: 14px; font-weight: 700; color: var(--muted); min-height: 21px; }
 .save-state.ok { color: var(--ok); }
 .save-state.err { color: var(--red); }
-.remove-row { margin: 4px 0 0; }
-.linkish { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; font-size: 13px; cursor: pointer; }
-.linkish:hover { color: var(--red); }
 
 /* ───────────── Planning de l'équipe ───────────── */
 .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 18px 0 20px; font-size: 14px; font-weight: 600; }
